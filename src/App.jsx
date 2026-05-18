@@ -71,7 +71,7 @@ export default function App() {
       if (type === 'delete') {
         setReviews(prev => prev.filter(r => r.id !== id));
         showToast(`✅ Review Deleted. RLHF updated.${feedbackMsg}`);
-      } else if (type === 'ignore') {
+      } else if (type === 'ignore' || type === 'approve') {
         // We can just mark it as verified instead of deleting it to show it stays in system but handled
         setReviews(prev => prev.map(r => r.id === id ? { ...r, isOverridden: true, confidenceScore: 100, statusColor: 'success', statusText: 'Verified Safe' } : r));
         showToast(`✅ Review Kept.${feedbackMsg}`);
@@ -192,10 +192,10 @@ export default function App() {
           {showPushNotification && (
             <div 
               style={{
-                position: 'absolute', top: '1rem', left: '1rem', right: '1rem',
+                position: 'fixed', top: '5rem', width: 'calc(100% - 2rem)', maxWidth: '448px', left: '50%', transform: 'translateX(-50%)',
                 background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)',
-                borderRadius: '16px', padding: '1rem', boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-                display: 'flex', gap: '1rem', alignItems: 'center', zIndex: 100,
+                borderRadius: '16px', padding: '1rem', boxShadow: '0 15px 35px rgba(0,0,0,0.25)',
+                display: 'flex', gap: '1rem', alignItems: 'center', zIndex: 100000,
                 border: '1px solid #e2e8f0', animation: 'slideInUp 0.3s', cursor: 'pointer'
               }}
               onClick={() => setShowPushNotification(false)}
