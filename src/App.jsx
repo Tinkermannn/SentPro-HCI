@@ -5,7 +5,7 @@ import MobileCard from './components/MobileCard';
 import LogicModal from './components/LogicModal';
 import ActionModal from './components/ActionModal';
 import FeedbackModal from './components/FeedbackModal';
-import { Monitor, Smartphone, ServerCrash, LayoutDashboard, Settings, LogOut, Bell, AlertTriangle, ArrowDownUp } from 'lucide-react';
+import { Monitor, Smartphone, ServerCrash, LayoutDashboard, Settings, LogOut, Bell, AlertTriangle, Filter, Wrench, X, Users, ClipboardList, Link as LinkIcon, FileText, AlertCircle, RotateCcw } from 'lucide-react';
 
 export default function App() {
   const [persona, setPersona] = useState('desktop');
@@ -20,6 +20,7 @@ export default function App() {
   const [sortOrder, setSortOrder] = useState('default');
 
   const [showPushNotification, setShowPushNotification] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   useEffect(() => {
     document.body.className = `theme-${persona}`;
@@ -35,9 +36,15 @@ export default function App() {
     setPersona('mobile');
   };
 
+  const riskRank = (r) => {
+    if (r.statusColor === 'danger') return 0;
+    if (r.statusColor === 'warning') return 1;
+    return 2; // success
+  };
+
   const sortedReviews = [...reviews].sort((a, b) => {
-    if (sortOrder === 'highToLow') return b.confidenceScore - a.confidenceScore;
-    if (sortOrder === 'lowToHigh') return a.confidenceScore - b.confidenceScore;
+    if (sortOrder === 'highToLow') return riskRank(a) - riskRank(b); // danger first
+    if (sortOrder === 'lowToHigh') return riskRank(b) - riskRank(a); // success first
     return a.id - b.id;
   });
 
@@ -84,21 +91,54 @@ export default function App() {
 
   return (
     <>
-      <div className="control-bar">
-        <button className={`control-btn ${persona === 'desktop' ? 'active' : ''}`} onClick={() => setPersona('desktop')}>
-          <Monitor size={18} /> Desktop (Baskara)
-        </button>
-        <button className={`control-btn ${persona === 'mobile' ? 'active' : ''}`} onClick={() => setPersona('mobile')}>
-          <Smartphone size={18} /> Mobile (Ratna)
-        </button>
-        <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)', margin: '0 0.5rem' }}></div>
-        <button className="control-btn" onClick={triggerPushNotification} style={{ color: '#2ed573' }}>
-          <Bell size={18} /> Simulasikan Notifikasi (Mobile)
-        </button>
-        <button className={`control-btn ${isServerDown ? 'active' : ''}`} style={{ color: isServerDown ? '#ff4757' : '' }} onClick={() => setIsServerDown(!isServerDown)}>
-          <ServerCrash size={18} /> {isServerDown ? 'Turn AI ON' : 'Turn AI OFF (Skenario 4)'}
-        </button>
-      </div>
+      {/* Wizard Toggle Button */}
+      <button
+        onClick={() => setWizardOpen(!wizardOpen)}
+        style={{
+          position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 100001,
+          width: '56px', height: '56px', borderRadius: '50%',
+          background: wizardOpen ? '#ff4757' : 'linear-gradient(135deg, #1e90ff, #0984e3)',
+          color: 'white', border: 'none', cursor: 'pointer',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'all 0.2s'
+        }}
+      >
+        {wizardOpen ? <X size={24} /> : <Wrench size={24} />}
+      </button>
+
+      {/* Wizard Control Panel */}
+      {wizardOpen && (
+        <div style={{
+          position: 'fixed', bottom: '5rem', right: '1.5rem', zIndex: 100000,
+          background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(16px)',
+          borderRadius: '16px', padding: '1rem', width: '280px',
+          border: '1px solid rgba(255,255,255,0.1)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+          animation: 'slideInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}>
+          <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: '700', color: '#64748b', letterSpacing: '1px', marginBottom: '0.75rem' }}>Wizard Control Panel</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <button className={`control-btn ${persona === 'desktop' ? 'active' : ''}`} onClick={() => { setPersona('desktop'); setWizardOpen(false); }} style={{ width: '100%', justifyContent: 'flex-start' }}>
+              <Monitor size={18} /> Desktop (Pak Baskara)
+            </button>
+            <button className={`control-btn ${persona === 'mobile' ? 'active' : ''}`} onClick={() => { setPersona('mobile'); setWizardOpen(false); }} style={{ width: '100%', justifyContent: 'flex-start' }}>
+              <Smartphone size={18} /> Mobile (Ibu Ratna)
+            </button>
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.25rem 0' }}></div>
+            <button className="control-btn" onClick={() => { triggerPushNotification(); setWizardOpen(false); }} style={{ width: '100%', justifyContent: 'flex-start', color: '#2ed573' }}>
+              <Bell size={18} /> Simulasi Notifikasi
+            </button>
+            <button className={`control-btn ${isServerDown ? 'active' : ''}`} onClick={() => setIsServerDown(!isServerDown)} style={{ width: '100%', justifyContent: 'flex-start', color: isServerDown ? '#ff4757' : '' }}>
+              <ServerCrash size={18} /> {isServerDown ? 'Nyalakan AI' : 'Matikan AI (Skenario 4)'}
+            </button>
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.25rem 0' }}></div>
+            <button className="control-btn" onClick={() => { setReviews(initialReviewData); setWizardOpen(false); showToast('🔄 Demo data telah direset.'); }} style={{ width: '100%', justifyContent: 'flex-start', color: '#ffa502' }}>
+              <RotateCcw size={18} /> Reset Demo (Kembalikan Data)
+            </button>
+          </div>
+        </div>
+      )}
 
       {toast && (
         <div style={{
@@ -130,15 +170,19 @@ export default function App() {
 
       {/* 💻 Desktop View (Pak Baskara) */}
       {persona === 'desktop' && (
-        <div className="app-container animate-in" style={{ paddingTop: '6rem', paddingLeft: '2rem', paddingRight: '2rem', paddingBottom: '2rem' }}>
-          <div className="glass-panel" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', borderRadius: '24px', display: 'flex', overflow: 'hidden', height: 'calc(100vh - 8rem)' }}>
+        <div className="app-container animate-in" style={{ paddingTop: '2rem', paddingLeft: '2rem', paddingRight: '2rem', paddingBottom: '2rem' }}>
+          <div className="glass-panel" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', borderRadius: '24px', display: 'flex', overflow: 'hidden', height: 'calc(100vh - 4rem)' }}>
             
             <div style={{ width: '80px', borderRight: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem 0' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #1e90ff, #0ea5e9)', marginBottom: '2rem' }}></div>
-              <LayoutDashboard size={24} color="#1e90ff" style={{ marginBottom: '1.5rem', cursor: 'pointer' }} />
-              <Settings size={24} color="#94a3b8" style={{ marginBottom: '1.5rem', cursor: 'pointer' }} />
+              <LayoutDashboard size={22} color="#1e90ff" style={{ marginBottom: '1.5rem', cursor: 'pointer' }} />
+              <Users size={22} color="#94a3b8" style={{ marginBottom: '1.5rem', cursor: 'pointer' }} />
+              <ClipboardList size={22} color="#94a3b8" style={{ marginBottom: '1.5rem', cursor: 'pointer' }} />
+              <LinkIcon size={22} color="#94a3b8" style={{ marginBottom: '1.5rem', cursor: 'pointer' }} />
+              <FileText size={22} color="#94a3b8" style={{ marginBottom: '1.5rem', cursor: 'pointer' }} />
+              <Settings size={22} color="#94a3b8" style={{ marginBottom: '1.5rem', cursor: 'pointer' }} />
               <div style={{ flex: 1 }}></div>
-              <LogOut size={24} color="#94a3b8" style={{ cursor: 'pointer' }} />
+              <LogOut size={22} color="#94a3b8" style={{ cursor: 'pointer' }} />
             </div>
 
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -154,9 +198,12 @@ export default function App() {
                     onClick={handleSortToggle}
                     style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
                   >
-                    <ArrowDownUp size={16} /> 
-                    Sort: {sortOrder === 'highToLow' ? 'High Risk First' : (sortOrder === 'lowToHigh' ? 'Low Risk First' : 'Default')}
+                    <Filter size={16} /> 
+                    Filter: {sortOrder === 'highToLow' ? 'High Risk First' : (sortOrder === 'lowToHigh' ? 'Low Risk First' : 'Default')}
                   </button>
+
+                  <Bell size={22} color="#94a3b8" style={{ cursor: 'pointer' }} />
+                  <AlertCircle size={22} color="#ff4757" style={{ cursor: 'pointer' }} />
 
                   {isServerDown && (
                     <div className="badge-premium" style={{ background: 'rgba(255, 71, 87, 0.2)', color: '#ff4757', border: '1px solid rgba(255, 71, 87, 0.4)' }}>
@@ -188,11 +235,11 @@ export default function App() {
 
       {/* 📱 Mobile View (Ibu Ratna) */}
       {persona === 'mobile' && (
-        <div className="mobile-wrapper animate-in" style={{ paddingTop: '6rem' }}>
+        <div className="mobile-wrapper animate-in" style={{ paddingTop: '0' }}>
           {showPushNotification && (
             <div 
               style={{
-                position: 'fixed', top: '5rem', width: 'calc(100% - 2rem)', maxWidth: '448px', left: '50%', transform: 'translateX(-50%)',
+                position: 'fixed', top: '1rem', width: 'calc(100% - 2rem)', maxWidth: '448px', left: '50%', transform: 'translateX(-50%)',
                 background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)',
                 borderRadius: '16px', padding: '1rem', boxShadow: '0 15px 35px rgba(0,0,0,0.25)',
                 display: 'flex', gap: '1rem', alignItems: 'center', zIndex: 100000,
@@ -210,13 +257,13 @@ export default function App() {
             </div>
           )}
 
-          <header style={{ padding: '1.5rem', background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 10 }}>
+          <header style={{ padding: '1.5rem', background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #10b981, #059669)' }}></div>
               <h1 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#0f172a' }}>Monitor Ulasan</h1>
             </div>
             <button onClick={handleSortToggle} style={{ background: 'none', border: 'none', color: '#1e90ff', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-              <ArrowDownUp size={18} /> Sort
+              <Filter size={18} /> Filter
             </button>
           </header>
 

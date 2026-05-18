@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, CheckCircle, ImageOff } from 'lucide-react';
+import { Search, CheckCircle, ImageOff, ShieldCheck } from 'lucide-react';
 
 export default function DesktopCard({ data, isServerDown, onOpenLogic, onOverride, onOpenAction }) {
   const isDanger = data.statusColor === 'danger';
@@ -16,11 +16,22 @@ export default function DesktopCard({ data, isServerDown, onOpenLogic, onOverrid
       gap: '1.5rem', 
       marginBottom: '1.5rem',
       transition: 'all 0.3s ease',
+      opacity: data.isOverridden ? 0.7 : 1,
       border: data.isOverridden ? '1px solid #2ed573' : (isDanger ? '2px solid #ff4757' : (isWarning ? '2px solid #ffa502' : '1px solid rgba(255,255,255,0.08)')),
       boxShadow: isDanger ? '0 0 20px rgba(255, 71, 87, 0.2)' : (isWarning ? '0 0 20px rgba(255, 165, 2, 0.2)' : 'var(--shadow-glass)')
     }}>
       {/* Left Column */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative' }}>
+        {data.isOverridden && (
+          <div style={{ 
+            position: 'absolute', top: '0.5rem', right: '0.5rem', zIndex: 2,
+            background: '#2ed573', borderRadius: '99px', padding: '0.25rem 0.75rem',
+            display: 'flex', alignItems: 'center', gap: '0.25rem',
+            fontSize: '0.75rem', fontWeight: '700', color: 'white'
+          }}>
+            <ShieldCheck size={14} /> Verified
+          </div>
+        )}
         <div style={{ background: 'var(--bg-box)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ color: '#f8fafc', fontWeight: '600', marginBottom: '0.25rem' }}>{data.productName}</div>
           <div style={{ color: '#64748b', fontSize: '0.875rem', fontFamily: 'monospace' }}>ID: {data.reviewId}</div>
@@ -76,6 +87,7 @@ export default function DesktopCard({ data, isServerDown, onOpenLogic, onOverrid
               <>
                 <CheckCircle size={40} color="#2ed573" style={{ marginBottom: '0.5rem' }} />
                 <div style={{ color: '#2ed573', fontWeight: '600' }}>Human Verified</div>
+                <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '0.25rem' }}>{data.statusText}</div>
               </>
             ) : (
               <>
@@ -86,22 +98,25 @@ export default function DesktopCard({ data, isServerDown, onOpenLogic, onOverrid
           </div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: 'auto' }}>
-          {!isServerDown && !data.isOverridden && (
-            <button className="btn-premium btn-glass" onClick={onOpenLogic}>
-              Brief Logic Explanation
-            </button>
-          )}
-          {data.statusColor === 'warning' && !data.isOverridden && !isServerDown ? (
-            <button className="btn-premium btn-primary" onClick={onOverride} style={{ background: 'linear-gradient(135deg, #ffa502, #ff7f50)' }}>
-              Manual Override
-            </button>
-          ) : (
-            <button className="btn-premium btn-primary" onClick={onOpenAction}>
-              Details & Action
-            </button>
-          )}
-        </div>
+        {/* Buttons - only show if card NOT yet handled */}
+        {!data.isOverridden && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: 'auto' }}>
+            {!isServerDown && (
+              <button className="btn-premium btn-glass" onClick={onOpenLogic}>
+                Brief Logic Explanation
+              </button>
+            )}
+            {isWarning && !isServerDown ? (
+              <button className="btn-premium btn-primary" onClick={onOverride} style={{ background: 'linear-gradient(135deg, #ffa502, #ff7f50)' }}>
+                Manual Override
+              </button>
+            ) : (
+              <button className="btn-premium btn-primary" onClick={onOpenAction}>
+                Details & Action
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
