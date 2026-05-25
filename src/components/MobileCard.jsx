@@ -1,7 +1,7 @@
 import React from 'react';
 import { Trash2, HelpCircle, ShieldCheck } from 'lucide-react';
 
-export default function MobileCard({ data, isServerDown, onDelete, onIgnore, onOpenLogic }) {
+export default function MobileCard({ data, isServerDown, onDelete, onIgnore, onRequestCheck, onOpenLogic }) {
   if (data.isDeleted) return null;
 
   const showAI = !isServerDown && !data.isOverridden;
@@ -125,13 +125,23 @@ export default function MobileCard({ data, isServerDown, onDelete, onIgnore, onO
             </button>
           )}
           
-          <button 
-            className="btn-premium btn-glass" 
-            style={{ width: '100%', padding: '1rem', color: '#475569', fontSize: '1.125rem', height: '54px', fontWeight: '700' }}
-            onClick={onIgnore}
-          >
-            {isSuccess ? 'Oke, Mengerti' : (isWarning ? 'Abaikan (Cek Manual)' : 'Abaikan (Ulasan Asli)')}
-          </button>
+          {isWarning ? (
+            <button 
+              className="btn-premium btn-glass" 
+              style={{ width: '100%', padding: '1rem', color: '#ffa502', fontSize: '1.125rem', height: '54px', fontWeight: '700', border: '1px solid rgba(255,165,2,0.3)' }}
+              onClick={onRequestCheck}
+            >
+              Minta Cek Manual ke Moderator
+            </button>
+          ) : (
+            <button 
+              className="btn-premium btn-glass" 
+              style={{ width: '100%', padding: '1rem', color: '#475569', fontSize: '1.125rem', height: '54px', fontWeight: '700' }}
+              onClick={onIgnore}
+            >
+              {isSuccess ? 'Oke, Mengerti' : 'Abaikan (Ulasan Asli)'}
+            </button>
+          )}
         </div>
       )}
     </div>

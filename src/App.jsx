@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { initialReviewData } from './data';
 import DesktopCard from './components/DesktopCard';
 import MobileCard from './components/MobileCard';
@@ -21,6 +21,8 @@ export default function App() {
 
   const [showPushNotification, setShowPushNotification] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [highlightedReviewId, setHighlightedReviewId] = useState(null);
+  const scrollContainerRef = useRef(null);
 
   useEffect(() => {
     document.body.className = `theme-${persona}`;
@@ -52,6 +54,28 @@ export default function App() {
     if (sortOrder === 'default') setSortOrder('highToLow');
     else if (sortOrder === 'highToLow') setSortOrder('lowToHigh');
     else setSortOrder('default');
+  };
+
+  // Cross-persona: Ibu Ratna requests manual check -> switches to Pak Baskara's dashboard
+  const handleRequestManualCheck = (review) => {
+    setIsProcessing(true);
+    showToast(`📤 Permintaan cek manual untuk "${review.productName}" dikirim ke Pak Baskara...`);
+    
+    setTimeout(() => {
+      setIsProcessing(false);
+      setPersona('desktop');
+      setHighlightedReviewId(review.id);
+      
+      // Scroll to the card after switching persona
+      setTimeout(() => {
+        const el = document.getElementById(`review-card-${review.id}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        // Clear highlight after 5 seconds
+        setTimeout(() => setHighlightedReviewId(null), 5000);
+      }, 300);
+    }, 1500);
   };
 
   const handleActionRequest = (type, data) => {
@@ -219,6 +243,7 @@ export default function App() {
                     key={review.id} 
                     data={review} 
                     isServerDown={isServerDown}
+                    isHighlighted={highlightedReviewId === review.id}
                     onOpenLogic={() => setModalData(review)}
                     onOverride={() => handleActionRequest('override', review)}
                     onOpenAction={() => setActionModalData(review)}
@@ -285,6 +310,7 @@ export default function App() {
                 isServerDown={isServerDown}
                 onDelete={() => handleActionRequest('delete', review)}
                 onIgnore={() => handleActionRequest('ignore', review)}
+                onRequestCheck={() => handleRequestManualCheck(review)}
                 onOpenLogic={() => setModalData(review)}
               />
             ))}

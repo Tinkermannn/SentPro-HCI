@@ -299,3 +299,8 @@ body {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+@keyframes pulseHighlight {
+  0%, 100% { box-shadow: 0 0 30px rgba(30, 144, 255, 0.5), 0 0 60px rgba(30, 144, 255, 0.2); }
+  50% { box-shadow: 0 0 50px rgba(30, 144, 255, 0.8), 0 0 80px rgba(30, 144, 255, 0.4); }
+}

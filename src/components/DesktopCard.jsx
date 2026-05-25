@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, CheckCircle, ImageOff, ShieldCheck } from 'lucide-react';
 
-export default function DesktopCard({ data, isServerDown, onOpenLogic, onOverride, onOpenAction }) {
+export default function DesktopCard({ data, isServerDown, isHighlighted, onOpenLogic, onOverride, onOpenAction }) {
   const isDanger = data.statusColor === 'danger';
   const isSuccess = data.statusColor === 'success';
   const isWarning = data.statusColor === 'warning';
@@ -9,7 +9,7 @@ export default function DesktopCard({ data, isServerDown, onOpenLogic, onOverrid
   const showAI = !isServerDown && !data.isOverridden;
 
   return (
-    <div className="glass-panel" style={{ 
+    <div id={`review-card-${data.id}`} className="glass-panel" style={{ 
       borderRadius: '16px', 
       padding: '1.5rem', 
       display: 'flex', 
@@ -17,8 +17,9 @@ export default function DesktopCard({ data, isServerDown, onOpenLogic, onOverrid
       marginBottom: '1.5rem',
       transition: 'all 0.3s ease',
       opacity: data.isOverridden ? 0.7 : 1,
-      border: data.isOverridden ? '1px solid #2ed573' : (isDanger ? '2px solid #ff4757' : (isWarning ? '2px solid #ffa502' : '1px solid rgba(255,255,255,0.08)')),
-      boxShadow: isDanger ? '0 0 20px rgba(255, 71, 87, 0.2)' : (isWarning ? '0 0 20px rgba(255, 165, 2, 0.2)' : 'var(--shadow-glass)')
+      border: isHighlighted ? '2px solid #1e90ff' : (data.isOverridden ? '1px solid #2ed573' : (isDanger ? '2px solid #ff4757' : (isWarning ? '2px solid #ffa502' : '1px solid rgba(255,255,255,0.08)'))),
+      boxShadow: isHighlighted ? '0 0 30px rgba(30, 144, 255, 0.5), 0 0 60px rgba(30, 144, 255, 0.2)' : (isDanger ? '0 0 20px rgba(255, 71, 87, 0.2)' : (isWarning ? '0 0 20px rgba(255, 165, 2, 0.2)' : 'var(--shadow-glass)')),
+      animation: isHighlighted ? 'pulseHighlight 1.5s ease-in-out infinite' : 'none'
     }}>
       {/* Left Column */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative' }}>
